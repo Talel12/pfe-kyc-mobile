@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 
-const UserDetailsConfirmation = ({ nextStep }) => {
+const UserDetailsConfirmation = ({ nextStep , previousStep }) => {
   const userDetails = useAppSelector((store) => store.user.currentUser);
   const user = useAppSelector((store) => store.user.currentUser);
   const dispatch = useAppDispatch();
@@ -23,7 +23,7 @@ const UserDetailsConfirmation = ({ nextStep }) => {
     if (user?.isValidate) {
       nextStep();
     }
-  }, [dispatch, nextStep, user]);
+  }, [dispatch]);
 
   const onConfirm = () => {
     axios
@@ -69,9 +69,14 @@ const UserDetailsConfirmation = ({ nextStep }) => {
         <Text style={styles.label}>ID Number: {cardNumber}</Text>
         <Text style={styles.label}>Issue Date: {issueDate}</Text>
         <Text style={styles.label}>Expiration Date: {expirationDate}</Text>
+        <View><TouchableOpacity style={styles.annuler} onPress={()=>previousStep()}>
+          <Text style={styles.confirmButtonText}>Annuler</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
           <Text style={styles.confirmButtonText}>Confirm</Text>
-        </TouchableOpacity>
+        </TouchableOpacity></View>
+        
+
       </View>
     </ScrollView>
   );
@@ -109,6 +114,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#03726C",
     borderRadius: 10,
   },
+  annuler:{marginTop: 30,
+    color:"#eeaa22",
+    padding: 15,
+    backgroundColor: "#eeaa22",
+    borderRadius: 10,},
   confirmButtonText: {
     color: "white",
     fontWeight: "bold",

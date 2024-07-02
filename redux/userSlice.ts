@@ -52,6 +52,9 @@ const userSlice = createSlice({
     setMessage(state, action: PayloadAction<string>) {
       state.message = action.payload;
     },
+    logout: (state) => {
+      state.currentUser = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -85,5 +88,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setMessage } = userSlice.actions;
+export const { setMessage, logout } = userSlice.actions;
 export default userSlice.reducer;

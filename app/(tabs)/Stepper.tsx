@@ -65,12 +65,12 @@ export default function Stepper() {
         return <DetailsScreen nextStep={nextStep} />;
       case 2:
         return (
-          <UserDetailsConfirmation nextStep={nextStep} />
+          <UserDetailsConfirmation nextStep={nextStep} previousStep={previousStep} />
           // <Text style={styles.stepContent}>Content for Order Summary</Text>
         );
       case 3:
         return (
-          <UserProfile previousStep={previousStep} />
+          <UserProfile setCurrentStep={setCurrentStep} previousStep={previousStep} />
           // <Text style={styles.stepContent}>Content for Payment Method</Text>
         );
       case 4:

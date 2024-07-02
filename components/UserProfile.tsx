@@ -1,22 +1,26 @@
 // components/UserProfile.js
 import { useAppDispatch, useAppSelector } from '@/redux/exportTypes';
-import { fetchUsers } from '@/redux/userSlice';
+import { fetchUsers, logout } from '@/redux/userSlice';
 import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const UserProfile = ({previousStep}) => {
+
+const UserProfile = ({previousStep, setCurrentStep}) => {
     const user = useAppSelector(store => store?.user?.currentUser);
     const {
-        username,
-        email,
-        phoneNumber,
-        isValidate,
-        passport,
-        id_card,
-        face,
-        detail,
-    } = user;
+        username = "",
+        email = "",
+        phoneNumber = "",
+        isValidate = "",
+        passport = "",
+        id_card = "",
+        face = "",
+        detail = "",
+    } = user || {};
     const dispatch=useAppDispatch()
+    const navigation = useNavigation();
+
 
     useEffect(() => {
         dispatch(fetchUsers(user?.id))
@@ -25,6 +29,12 @@ const UserProfile = ({previousStep}) => {
         }
   
    }, []);
+
+   const handleLogout = () => {
+    dispatch(logout());
+    setCurrentStep(0)
+    navigation.navigate('index');
+  };
 
     return (
         <ScrollView style={styles.container}>
@@ -63,6 +73,7 @@ const UserProfile = ({previousStep}) => {
                     <Text><Text style={styles.bold}>Number:</Text> {detail?.passportNumber}</Text>
                     <Text><Text style={styles.bold}>Issue Date:</Text> {detail?.issueDate}</Text>
                     <Text><Text style={styles.bold}>Expiration Date:</Text> {detail?.expirationDate}</Text>
+                <Button title="Logout" onPress={handleLogout} />
                 </View>
                
             </View>
