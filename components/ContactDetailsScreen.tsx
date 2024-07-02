@@ -1,19 +1,39 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View, ScrollView, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  ScrollView,
+  Alert,
+} from "react-native";
 import Country from "./Country";
 import OTPInput from "./OTPInput";
 import { SwipeButton } from "react-native-expo-swipe-button";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import { useAppSelector } from "@/redux/exportTypes";
 
-const ContactDetailsScreen = ({ nextStep }) => {
+const ContactDetailsScreen = ({ nextStep, setCurrentStep }) => {
+  const currentUser = useAppSelector(store=>store.user.currentUser);
+  console.log("🚀 ~ ContactDetailsScreen ~ currentUser:", currentUser)
   const [showOTP, setShowOTP] = useState(false);
   const [otpComplete, setOtpComplete] = useState(false);
-  console.log("🚀 ~ ContactDetailsScreen ~ otpComplete:", otpComplete)
+  console.log("🚀 ~ ContactDetailsScreen ~ otpComplete:", otpComplete);
   const [otpLoading, setOTPLoading] = useState(false);
+  const [errorText, setErrorText] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+
+  useEffect(() => {
+    if(currentUser){
+      // nextStep()
+      setCurrentStep(1)
+    }
+  }, []);
+
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -29,19 +49,44 @@ const ContactDetailsScreen = ({ nextStep }) => {
   };
 
   const handleSwipe = () => {
-    axios.post(`${process.env.EXPO_PUBLIC_STRAPI_URL}/api/auth/local/register`,{
-      email:email, username:email,password:password
-    }).catch((error)=>Alert.alert(error.message))
-    // nextStep()
-  }
+    axios
+      .post(`${process.env.EXPO_PUBLIC_STRAPI_URL}/api/auth/local`, {
+        identifier: email,
+        password: password,
+      })
+      .then(() => nextStep())
+      .catch((error) =>
+        axios
+          .post(
+            `${process.env.EXPO_PUBLIC_STRAPI_URL}/api/auth/local/register`,
+            {
+              email: email,
+              username: email,
+              password: password,
+              phoneNumber,
+            }
+          )
+          .then(() => nextStep())
+          .catch((error) => Alert.alert(error.message))
+      );
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <View>
-        <Country setShowOTP={setShowOTP} setOTPLoading={setOTPLoading}/>
-        {otpLoading ? <Text>Waiting ...</Text> : <></> }
-        {showOTP && <OTPInput onOTPComplete={setOtpComplete} />}
-        {otpComplete && (
+        <Country
+          setPhoneNumber={setPhoneNumber}
+          setShowOTP={setShowOTP}
+          setOTPLoading={setOTPLoading}
+        />
+        {otpLoading ? <Text>Waiting ...</Text> : <></>}
+        {showOTP && (
+          <OTPInput phoneNumber={phoneNumber} onOTPComplete={setOtpComplete} setErrorText={setErrorText} nextStep={nextStep}/>
+        )}
+        {otpComplete ? (
           <>
             <TextInput
               style={styles.input}
@@ -51,22 +96,24 @@ const ContactDetailsScreen = ({ nextStep }) => {
               value={email}
             />
             {email.length > 0 && (
-              <Text style={{ textAlign: "left", marginTop: 6, color: "#6A707C" }}>
+              <Text
+                style={{ textAlign: "left", marginTop: 6, color: "#6A707C" }}
+              >
                 For communication and e-statements
               </Text>
             )}
             {/* {showPasswordInput && ( */}
-              <TextInput
-                style={[styles.input, { marginTop: 20 }]}
-                placeholder="Enter your password"
-                secureTextEntry={true}
-                onChangeText={handlePasswordChange}
-                value={password}
-              />
+            <TextInput
+              style={[styles.input, { marginTop: 20 }]}
+              placeholder="Enter your password"
+              secureTextEntry={true}
+              onChangeText={handlePasswordChange}
+              value={password}
+            />
             {/* ) */}
             {/* } */}
           </>
-        )}
+        ) : errorText ? <Text>{errorText}</Text> : <></>}
       </View>
       <View>
         <Text style={{ alignSelf: "center" }}>
@@ -76,7 +123,9 @@ const ContactDetailsScreen = ({ nextStep }) => {
         </Text>
         <SwipeButton
           width={"100%"}
-          Icon={<Ionicons name="chevron-forward-outline" size={50} color="white" />}
+          Icon={
+            <Ionicons name="chevron-forward-outline" size={50} color="white" />
+          }
           disabled={!password}
           onSwipeEnd={handleSwipe}
           title="Slide to confirm"
@@ -95,7 +144,7 @@ const ContactDetailsScreen = ({ nextStep }) => {
 const styles = StyleSheet.create({
   input: {
     width: "100%",
-    flex:1,
+    flex: 1,
     backgroundColor: "#eee",
     padding: 12,
     borderColor: "#aaa",

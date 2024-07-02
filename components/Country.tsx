@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import axios from "axios";
 
-const Country = ({ setShowOTP, setOTPLoading }) => {
+const Country = ({ setPhoneNumber, setShowOTP, setOTPLoading }) => {
   const [selectedCountry, setSelectedCountry] = useState<null | ICountry>(null);
   const [inputValue, setInputValue] = useState<string>("");
   const [PhoneInput, setPhoneInput] = useState<null | React.FC<any>>(null);
@@ -20,6 +20,7 @@ const Country = ({ setShowOTP, setOTPLoading }) => {
     {
       setOTPLoading(true);
       // Send SMS request to Strapi API
+      setPhoneNumber(`${selectedCountry?.callingCode}${inputValue}`)
       axios
         .post(`${process.env.EXPO_PUBLIC_STRAPI_URL}/api/send-sms`, {
           phoneNumber: `${selectedCountry?.callingCode}${inputValue}`,

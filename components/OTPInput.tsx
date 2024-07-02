@@ -1,20 +1,45 @@
-import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Text, Alert } from 'react-native';
+import { useAppDispatch } from "@/redux/exportTypes";
+import { validateOTP } from "@/redux/userSlice";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import { View, TextInput, StyleSheet, Text, Alert } from "react-native";
 
-const OTPInput = ({ onOTPComplete }) => {
-  const [otp, setOtp] = useState(['', '', '', '']);
+const OTPInput = ({ phoneNumber, onOTPComplete, setErrorText , nextStep }) => {
+  const [otp, setOtp] = useState(["", "", "", ""]);
   const inputs = useRef<(TextInput | null)[]>([]);
 
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
-    if (otp.every(digit => digit !== '')) {
-      onOTPComplete(true)
-      axios.post(`${process.env.EXPO_PUBLIC_STRAPI_URL}/api/verify-code`,otp)
-      .then(()=>onOTPComplete(true))
-      
-      .catch((error) => {
-        Alert.alert(error.response.data.message || "An error occurred");
-      });
+    if (otp.every((digit) => digit !== "")) {
+      // onOTPComplete(true);
+      dispatch(
+        validateOTP({ enteredOTP: otp.join(""), phoneNumber: phoneNumber })
+      )
+        // axios.post(`${process.env.EXPO_PUBLIC_STRAPI_URL}/api/verify-code`,{enteredOTP:otp.join(''),phoneNumber:phoneNumber})
+        .then((data) => {
+
+          // if(!data) 
+          // console.log(data.payload);
+          if(data.payload.user){
+            nextStep()
+          }
+         else if(data.payload.message){
+            onOTPComplete(true)
+          }
+          else{
+            {setErrorText("Invalid code ... please verify your code")
+              return
+            }
+          }
+          
+          
+        })
+
+        .catch((error) => {
+          setErrorText("Invalid code ... please verify your code")
+          Alert.alert(error?.response?.data?.message || "An error occurred");
+        });
     } else {
       onOTPComplete(false);
     }
@@ -31,7 +56,7 @@ const OTPInput = ({ onOTPComplete }) => {
   };
 
   const handleKeyPress = (e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace' && index > 0 && !otp[index]) {
+    if (e.nativeEvent.key === "Backspace" && index > 0 && !otp[index]) {
       inputs.current[index - 1]?.focus();
     }
   };
@@ -58,13 +83,13 @@ const OTPInput = ({ onOTPComplete }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 10,
   },
   inputWrapper: {
-    position: 'relative',
+    position: "relative",
     margin: 5,
   },
   input: {
@@ -73,17 +98,17 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 40,
     height: 50,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
   },
   circle: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     left: 10,
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
 });
 

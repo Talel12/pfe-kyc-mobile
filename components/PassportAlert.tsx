@@ -28,7 +28,7 @@ export default function PassportAlert({ visible = true, onClose }) {
         animationType="slide"
         onRequestClose={() => setVisibleCamera(false)}
       >
-        <CameraComponent onClose={() => setVisibleCamera(false)} />
+        <CameraComponent onClose={() => setVisibleCamera(false)} origin={"passport"}/>
       </Modal>
       <View style={styles.innerContainer}>
         <Image

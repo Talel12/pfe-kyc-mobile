@@ -11,7 +11,7 @@ import CameraComponent from "./Camera";
 import CameraFaceComponent from "./CameraFace";
 // import { useNavigation } from '@react-navigation/native'; // Import de la navigation
 
-export default function VerifIdentity({ visible = true, onClose }) {
+export default function VerifIdentity({ visible = true, onClose , nextStep}) {
   const [visibleCamera, setVisibleCamera] = useState(false);
   // const navigation = useNavigation(); // Initialisation de la navigation
 
@@ -29,7 +29,7 @@ export default function VerifIdentity({ visible = true, onClose }) {
         animationType="slide"
         onRequestClose={() => setVisibleCamera(false)}
       >
-        <CameraFaceComponent onClose={() => setVisibleCamera(false)} />
+        <CameraFaceComponent onClose={() => setVisibleCamera(false)} nextStep={nextStep}/>
       </Modal>
       <View style={styles.innerContainer}>
         <Image

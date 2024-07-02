@@ -3,9 +3,13 @@ import { Alert, Image, StyleSheet, Text, View } from "react-native";
 import { SwipeButton } from "react-native-expo-swipe-button";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
+import { useAppDispatch, useAppSelector } from "@/redux/exportTypes";
+
 
 export default function HomeScreen() {
   const navigation = useNavigation(); 
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector(state => state.user);
   return (
     <View style={styles.titleContainer}>
       <Image

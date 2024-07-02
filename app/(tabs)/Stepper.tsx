@@ -1,11 +1,21 @@
 import { View, Text, StyleSheet, SafeAreaView, Button } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import StepIndicator from "react-native-step-indicator";
 import CustomStepIndicator from "@/components/Indicator";
 import DetailsScreen from "@/components/DetailsScreen";
 import ContactDetailsScreen from "@/components/ContactDetailsScreen";
+import { useAppDispatch, useAppSelector } from "@/redux/exportTypes";
+import { fetchUsers } from "@/redux/userSlice";
+import UserDetailsConfirmation from "@/components/UserDetailsConfirmation";
+import UserProfile from "@/components/UserProfile";
 
 export default function Stepper() {
+  const user = useAppSelector(store => store.user.currentUser)
+  const dispatch = useAppDispatch()
+  useEffect(() => {
+    if (!user) return;
+    dispatch(fetchUsers(user?.id))
+  }, []);
   const customStyles = {
     stepIndicatorSize: 30,
     currentStepIndicatorSize: 40,
@@ -33,7 +43,7 @@ export default function Stepper() {
   const labels = [
     "Contact details",
     "Documents verification",
-    "Face recognition",
+    "Confirm Information",
     "Personal details",
   ];
 
@@ -50,16 +60,18 @@ export default function Stepper() {
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return <ContactDetailsScreen nextStep={nextStep} />; // <Text style={styles.stepContent}>Content for Cart</Text>;
+        return <ContactDetailsScreen nextStep={nextStep} setCurrentStep={setCurrentStep}/>; // <Text style={styles.stepContent}>Content for Cart</Text>;
       case 1:
-        return <DetailsScreen />;
+        return <DetailsScreen nextStep={nextStep} />;
       case 2:
         return (
-          <Text style={styles.stepContent}>Content for Order Summary</Text>
+          <UserDetailsConfirmation nextStep={nextStep} />
+          // <Text style={styles.stepContent}>Content for Order Summary</Text>
         );
       case 3:
         return (
-          <Text style={styles.stepContent}>Content for Payment Method</Text>
+          <UserProfile previousStep={previousStep} />
+          // <Text style={styles.stepContent}>Content for Payment Method</Text>
         );
       case 4:
         return <Text style={styles.stepContent}>Content for Track</Text>;
@@ -131,6 +143,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex:1,
+    width:'100%',
     // height: "100%",
     marginVertical: 20,
     padding: 10,

@@ -1,16 +1,29 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import RBSheet from "react-native-raw-bottom-sheet";
 import PassportAlert from "./PassportAlert";
 import IDAlert from "./IDAlert";
 import VerifIdentity from "./VerifIdentity";
+import { useAppDispatch, useAppSelector } from "@/redux/exportTypes";
+import { fetchUsers } from "@/redux/userSlice";
 
-export default function DetailsScreen() {
+export default function DetailsScreen({nextStep}) {
   const [showIDAlert, setShowIDAlert] = useState(false);
   const [showPassportAlert, setShowPassportAlert] = useState(false);
   const [showVerifyAlert, setShowVerifyAlert] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(false);
+
+  const user = useAppSelector(store => store.user.currentUser)
+  const dispatch = useAppDispatch()
+  useEffect(() => {
+    if (!user) return;
+    dispatch(fetchUsers(user?.id))
+
+    if(user?.detail){
+      nextStep()
+    }
+  }, []);
 
   const refRBSheet = useRef();
 
@@ -20,7 +33,7 @@ export default function DetailsScreen() {
     } else if (showIDAlert) {
       return <IDAlert visible={showIDAlert} onClose={() => setShowIDAlert(false)} />
     } else {
-      return <VerifIdentity visible={showVerifyAlert} onClose={() => setShowVerifyAlert(false)} />
+      return <VerifIdentity visible={showVerifyAlert} onClose={() => setShowVerifyAlert(false)} nextStep={nextStep}/>
     }
   }
 
@@ -64,25 +77,37 @@ export default function DetailsScreen() {
           </View>
 
           <TouchableOpacity
-            onPress={handlePress}
-            style={styles.contentContainer}
-          >
-            <Image
-              source={require("../assets/images/id.png")}
-              style={styles.image}
-            />
-            <Text style={styles.imageName}>Emirates ID</Text>
-            <AntDesign
-              name="rightcircleo"
-              size={24}
-              color="rgba(0, 0, 0, 0.5)"
-              style={styles.icon}
-            />
-          </TouchableOpacity>
+      onPress={handlePress}
+      style={[styles.contentContainer, user?.id_card?.isValid && styles.disabledContainer]}
+      disabled={user?.id_card?.isValid}
+    >
+      <Image
+        source={require("../assets/images/id.png")}
+        style={styles.image}
+      />
+      <Text style={styles.imageName}>Emirates ID</Text>
+      {user?.id_card?.isValid ? (
+        <AntDesign
+          name="check"
+          size={24}
+          color="rgb(3, 114, 108)"
+          style={styles.icon}
+        />
+      ) : (
+        <AntDesign
+          name="rightcircleo"
+          size={24}
+          color="rgba(0, 0, 0, 0.5)"
+          style={styles.icon}
+        />
+      )}
+    </TouchableOpacity>
+
 
           <TouchableOpacity
             onPress={handlePress2}
-            style={styles.contentContainer}
+            style={[styles.contentContainer, user?.passport?.isValid && styles.disabledContainer]}
+      disabled={user?.passport?.isValid}
           >
             <Image
               source={require("../assets/images/ps.png")}
@@ -94,12 +119,21 @@ export default function DetailsScreen() {
                 Not required for UAE Nationals
               </Text>
             </Text>
-            <AntDesign
-              name="rightcircleo"
-              size={24}
-              color="rgba(0, 0, 0, 0.5)"
-              style={styles.icon}
-            />
+            {user?.passport?.isValid ? (
+        <AntDesign
+          name="check"
+          size={24}
+          color="rgb(3, 114, 108)"
+          style={styles.icon}
+        />
+      ) : (
+        <AntDesign
+          name="rightcircleo"
+          size={24}
+          color="rgba(0, 0, 0, 0.5)"
+          style={styles.icon}
+        />
+      )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -186,6 +220,9 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingRight: 20,
     marginBottom: 20,
+  },
+  disabledContainer: {
+    opacity: 0.5, // Adjust the opacity to visually indicate that it's disabled
   },
   image: {
     width: 50,

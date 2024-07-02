@@ -7,8 +7,11 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import ServiceCard from '@/components/ServiceCard';
+import { useAppSelector } from '@/redux/exportTypes';
 
 export default function TabTwoScreen() {
+  const user=useAppSelector(store => store.user.currentUser)
+  const {isValidate} = user
   return (
     <View style={styles.exploreContainer}>
       <Text style={styles.serviceTitle}>-_-  Nos Services  -_-</Text>

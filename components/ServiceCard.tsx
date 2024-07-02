@@ -7,7 +7,7 @@ const ServiceCard = ({title, name }: IconProps<ComponentProps<typeof Ionicons>['
     return (
         <View style={styles.card}>
             <Ionicons name={name} size={50}/>
-            <Text>{title}</Text>
+            <Text style={{fontSize:12}}>{title}</Text>
         </View>
     );
 }
